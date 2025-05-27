@@ -6,9 +6,15 @@ use App\Models\Listing;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Redirect;
+use Illuminate\Support\Facades\Auth;
 
 class ListingController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->authorizeResource(Listing::class, 'listing');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -45,7 +51,7 @@ class ListingController extends Controller
             'street_nr' => 'required|min:1|max:1000',
             'price' => 'required|integer|min:1|max:20000000',
         ]);
-        Listing::create($validated);
+        $request->user()->listings()->create($validated);
         return Redirect()->route('listing.index')
             ->with('success', 'Listing was created!');
     }
@@ -55,6 +61,10 @@ class ListingController extends Controller
      */
     public function show(Listing $listing)
     {
+        // if(Auth::user()->cannot('view', $listing)){
+        //     abort(403, 'Unauthorized action.');
+        // }
+        
         return inertia(
             'Listing/Show',
             [
